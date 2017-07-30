@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Календарь событий</string>
+
+
+    <string name="BTCalendarEvent">Календарь событий</string>
+    <string name="BTPortalkulturaTo">Портал культуры</string>
+</resources>
