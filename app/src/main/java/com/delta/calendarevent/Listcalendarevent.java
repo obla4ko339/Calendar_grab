@@ -1,6 +1,7 @@
 package com.delta.calendarevent;
 
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -35,6 +36,11 @@ public class Listcalendarevent extends AppCompatActivity {
     JSONObject jsonObjectnew = null;
     JSONObject frd;
 
+    int dayOfMonth;
+    int month;
+    int year;
+    String dayOfMonthString;
+
     List<DataCalendarEvent> dataCalendarEventsList = new ArrayList<>();
 
 
@@ -42,16 +48,27 @@ public class Listcalendarevent extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycle);
+        dayOfMonth = getIntent().getIntExtra("dayOfMonth",0);
+        month = getIntent().getIntExtra("month",0)+1;
+        year = getIntent().getIntExtra("year",0);
+
+        if(dayOfMonth >= 1 && dayOfMonth<=9 ){
+            dayOfMonthString = "0"+dayOfMonth;
+        }else{
+            dayOfMonthString = dayOfMonth+"";
+        }
+
+
         ParseTask parseTask = new ParseTask();
         parseTask.execute();
 
         try {
             jsonObjectnew = new JSONObject(parseTask.get());
-            JSONArray jsonArraynew = jsonObjectnew.getJSONArray("friends");
+            JSONArray jsonArraynew = jsonObjectnew.getJSONArray("event");
 
             for(int i =0; i<jsonArraynew.length(); i++){
                 frd = jsonArraynew.getJSONObject(i);
-                DataCalendarEvent dataCalendarEvent = new DataCalendarEvent(frd.getString("name"),frd.getString("city"),frd.getString("city"),frd.getString("id") );
+                DataCalendarEvent dataCalendarEvent = new DataCalendarEvent(frd.getString("title"),frd.getString("shortdesc"),frd.getString("type"),frd.getString("startdate") );
                 dataCalendarEventsList.add(dataCalendarEvent);
             }
 
@@ -70,9 +87,7 @@ public class Listcalendarevent extends AppCompatActivity {
         }
 
 
-        int dayOfMonth = getIntent().getIntExtra("dayOfMonth",0);
-        int month = getIntent().getIntExtra("month",0);
-        int year = getIntent().getIntExtra("year",0);
+
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         String[] data = new String[]{"Gthdsq","Dnjhjq"};
@@ -92,12 +107,17 @@ public class Listcalendarevent extends AppCompatActivity {
         HttpURLConnection urlConnection;
         BufferedReader reader;
         String resultJson = "";
+        URL url;
 
         @Override
         protected String doInBackground(Void... params) {
+            Log.d("DAY_MONTH_YEAR", "ura "+dayOfMonth+" "+month+" "+year);
 
+            Log.d("URL", "http://kultura-to.ru/mjson.php?datepost="+year+"-"+month+"-"+dayOfMonthString+"");
             try {
-                URL url = new URL("http://androiddocs.ru/api/friends.json");
+                    url = new URL("http://kultura-to.ru/mjson.php?datepost="+year+"-"+month+"-"+dayOfMonthString+"");
+
+
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -129,17 +149,20 @@ public class Listcalendarevent extends AppCompatActivity {
         protected void onPostExecute(String resultJson) {
             super.onPostExecute(resultJson);
 
+            Log.d("MYJSON", resultJson);
+
             JSONObject jsonObject = null;
             String name = "";
 
             try {
                 jsonObject = new JSONObject(resultJson);
 
-                JSONArray frinds = jsonObject.getJSONArray("friends");
+                JSONArray event = jsonObject.getJSONArray("event");
+                event.getJSONObject(1).getString("title");
 
-                for(int i = 0; i<frinds.length(); i++){
-                    JSONObject frind = frinds.getJSONObject(i);
-                    Log.d("MYLOG", frind .getString("name"));
+                for(int i = 0; i<event.length(); i++){
+                    JSONObject frind = event.getJSONObject(i);
+                    Log.d("MYLOG", frind.getString("title"));
                 }
 
 
